@@ -16,7 +16,6 @@ X = df.drop(['car_name','brand', 'selling_price'], axis=1)
 y = df['selling_price']
 
 
-
 def num_column_transformer(df):
     le = LabelEncoder()
     le_cols = ['model']
@@ -26,7 +25,7 @@ def num_column_transformer(df):
 def cat_column_transformer(df):
 
     df['model']=num_column_transformer(df)
-    
+
     ohe = OneHotEncoder()
     scaler = StandardScaler()
 
