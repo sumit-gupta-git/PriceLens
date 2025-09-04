@@ -15,7 +15,7 @@ def validate_data():
 
     return df
 
-print()
+
 
 def analyze_categorical_features(df):
     cat_features = [feature for feature in df.columns if df[feature].dtype == "object"]
