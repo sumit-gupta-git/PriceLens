@@ -16,7 +16,6 @@ def validate_data():
     return df
 
 
-
 def analyze_categorical_features(df):
     cat_features = [feature for feature in df.columns if df[feature].dtype == "object"]
     print(f"Number of categorical features are {len(cat_features)} and name of those features are {cat_features}")
