@@ -16,6 +16,7 @@ X = df.drop(['car_name','brand', 'selling_price'], axis=1)
 y = df['selling_price']
 
 
+
 def num_column_transformer(df):
     le = LabelEncoder()
     le_cols = ['model']
