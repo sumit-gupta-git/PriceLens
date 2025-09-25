@@ -1,0 +1,13 @@
+python
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+joblib
+flask
+flask_cors
+requests
+streamlit
+streamlit_autorefresh
+plotly
