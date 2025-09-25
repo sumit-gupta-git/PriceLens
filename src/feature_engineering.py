@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import logging
 from sklearn.base import BaseEstimator, TransformerMixin
-from data_preprocessing import DataPreprocessor,CustomCategoricalTransformer, CustomNumericalTransformer
+from src.data_preprocessing import DataPreprocessor, CustomCategoricalTransformer, CustomNumericalTransformer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

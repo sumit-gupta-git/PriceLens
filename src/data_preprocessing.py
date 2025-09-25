@@ -3,7 +3,6 @@ import numpy as np
 import logging
 from typing import Dict, List, Optional, Tuple
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

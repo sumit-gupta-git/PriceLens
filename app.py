@@ -1,10 +1,10 @@
-# flask_backend.py
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import pickle
+import joblib
 import pandas as pd
 import numpy as np
 import logging
+from src.feature_engineering import FeatureEngineer
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -22,7 +22,7 @@ def load_model():
     
     try:
         with open('models/model.pkl', 'rb') as f:
-            model = pickle.load(f)
+            model = joblib.load(f)
             
         logger.info("Model loaded successfully")
         
@@ -118,8 +118,11 @@ def home():
 
 @app.route('/predict', methods=['GET','POST'])
 def predict_price():
+
     try:
+        global model
         data = request.get_json()
+        fe = FeatureEngineer()
         
         if not data:
             return jsonify({'error': 'No data provided'}), 400
@@ -134,8 +137,16 @@ def predict_price():
                 'error': f'Missing required fields: {", ".join(missing_fields)}'
             }), 400
         
+                
         input_df = pd.DataFrame([data])
         X = prepare_features(input_df)
+        print(X.columns)
+        
+        #extract features
+        X = fe.apply(X)
+        print(X.columns)
+
+        
 
         prediction = model.predict(X)[0]
         

@@ -71,6 +71,6 @@ if __name__ == '__main__':
     #evaluation
     mae, rmse, r2_score = p.evaluate_model(p.y_test, y_pred)
     print(mae, rmse, r2_score)
-
+    print(type(model))
     joblib.dump(model, '/home/sumit/PriceLens/models/model.pkl')
     
