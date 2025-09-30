@@ -8,10 +8,13 @@ logger = logging.getLogger(__name__)
 
 class Prediction:
     def __init__(self):
-        self.independent = ['brand', 'vehicle_age', 'km_driven', 'engine', 
-                            'max_power', 'mileage', 'age_category', 'km_per_year', 'mileage_category',
-                            'power_to_engine_ratio', 'engine_category', 'power_category', 'efficiency_score',
-                            'fuel_efficiency', 'is_premium_brand', 'is_popular_brand']
+        self.independent = ['vehicle_age', 'km_driven', 'mileage', 'engine', 'max_power', 'seats',
+                             'km_per_year', 'power_to_engine_ratio',
+                            'efficiency_score', 'is_premium_brand', 'is_popular_brand',
+                            'brand_encoded', 'seller_type_encoded', 'fuel_type_encoded',
+                            'transmission_type_encoded', 'age_category_encoded',
+                            'mileage_category_encoded', 'engine_category_encoded',
+                            'power_category_encoded', 'fuel_efficiency_encoded']
         
         self.dependent = ['selling_price']
         self.model = {}

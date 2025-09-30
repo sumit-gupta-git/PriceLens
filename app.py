@@ -70,41 +70,6 @@ def create_dummy_model():
     
     logger.info("Dummy model created for demonstration")
 
-def encode_categorical_features(data):
-    processed_data = data.copy()
-    
-    # Brand encoding
-    brand_mapping = {
-        'Maruti': 0, 'Hyundai': 1, 'Honda': 2, 'Toyota': 3, 'Ford': 4,
-        'Mahindra': 5, 'Renault': 6, 'Nissan': 7, 'Tata': 8, 'Volkswagen': 9,
-        'BMW': 10, 'Mercedes': 11, 'Audi': 12, 'Other': 13
-    }
-    processed_data['brand_encoded'] = processed_data['brand'].map(brand_mapping).fillna(13)
-    
-    # Seller type encoding
-    seller_mapping = {'Dealer': 0, 'Individual': 1, 'TrustMark': 2}
-    processed_data['seller_type_encoded'] = processed_data['seller_type'].map(seller_mapping).fillna(1)
-    
-    # Fuel type encoding
-    fuel_mapping = {'Petrol': 0, 'Diesel': 1, 'CNG': 2, 'LPG': 3, 'Electric': 4}
-    processed_data['fuel_type_encoded'] = processed_data['fuel_type'].map(fuel_mapping).fillna(0)
-    
-    # Transmission encoding
-    transmission_mapping = {'Manual': 0, 'Automatic': 1}
-    processed_data['transmission_type_encoded'] = processed_data['transmission_type'].map(transmission_mapping).fillna(0)
-    
-    return processed_data
-
-def prepare_features(data):
-    # Encode categorical variables
-    processed_data = encode_categorical_features(data)
-    
-    feature_columns = ['brand_encoded', 'vehicle_age', 'km_driven', 'seller_type_encoded', 
-                      'fuel_type_encoded', 'transmission_type_encoded', 'mileage', 'engine', 
-                      'max_power', 'seats']
-    
-    X = processed_data[feature_columns]
-    return X
 
 @app.route('/')
 def home():
@@ -139,14 +104,11 @@ def predict_price():
         
                 
         input_df = pd.DataFrame([data])
-        X = prepare_features(input_df)
-        print(X.columns)
         
         #extract features
-        X = fe.apply(X)
+        X = fe.apply(input_df)
         print(X.columns)
 
-        
 
         prediction = model.predict(X)[0]
         

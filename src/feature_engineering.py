@@ -91,7 +91,7 @@ class FeatureEngineer:
             logger.info("Efficiency features created")
         
         return df_features
-    
+        
     def create_brand_features(self, df):
         df_features = df.copy()
         
@@ -105,40 +105,102 @@ class FeatureEngineer:
             df_features['is_popular_brand'] = df_features['brand'].isin(popular_brands).astype(int)
             
             logger.info("Brand features created")
+        else:
+            # If brand column doesn't exist, create default features
+            logger.warning("Brand column not found, creating default brand features")
+            df_features['is_premium_brand'] = 0
+            df_features['is_popular_brand'] = 0
         
         return df_features
-    
-    def scale_features(self, df, dtype, fit=True):
-        df_feature = df.copy()
+
+    def encode_categorical_features(self, data):
+        processed_data = data.copy()
         
-        if dtype == 'object':
-           
-            if fit:
-                transformer = CustomCategoricalTransformer(method='label_encode')
-                encoded_features = transformer.fit_transform(df_feature)
-                self.encoders['categorical'] = transformer
-                logger.info("Fitted categorical encoder")
-                return encoded_features
-            else:
-                if 'categorical' not in self.encoders:
-                    raise ValueError("Categorical encoder not fitted yet")
-                encoded_features = self.encoders['categorical'].transform(df_feature)
-                logger.info("Applied fitted categorical encoder")
-                return encoded_features
-        
+        # Original categorical features encoding
+        if 'brand' in processed_data.columns:
+            brand_mapping = {
+                'Maruti': 0, 'Hyundai': 1, 'Honda': 2, 'Toyota': 3, 'Ford': 4,
+                'Mahindra': 5, 'Renault': 6, 'Nissan': 7, 'Tata': 8, 'Volkswagen': 9,
+                'BMW': 10, 'Mercedes': 11, 'Audi': 12, 'Other': 13
+            }
+            processed_data['brand_encoded'] = processed_data['brand'].map(brand_mapping).fillna(13)
         else:
-            if fit:
-                transformer = CustomNumericalTransformer(method='standard')
-                scaled_features = transformer.fit_transform(df_feature)
-                self.scalers['numerical'] = transformer
-                logger.info("Fitted numerical scaler")
-                return scaled_features
-            else:
-                if 'numerical' not in self.scalers:
-                    raise ValueError("Numerical scaler not fitted yet")
-                scaled_features = self.scalers['numerical'].transform(df_feature)
-                logger.info("Applied fitted numerical scaler")
-                return scaled_features
+            processed_data['brand_encoded'] = 13  # Default to 'Other'
+        
+        if 'seller_type' in processed_data.columns:
+            seller_mapping = {'Dealer': 0, 'Individual': 1, 'TrustMark': 2}
+            processed_data['seller_type_encoded'] = processed_data['seller_type'].map(seller_mapping).fillna(1)
+        else:
+            processed_data['seller_type_encoded'] = 1  # Default
+        
+        if 'fuel_type' in processed_data.columns:
+            fuel_mapping = {'Petrol': 0, 'Diesel': 1, 'CNG': 2, 'LPG': 3, 'Electric': 4}
+            processed_data['fuel_type_encoded'] = processed_data['fuel_type'].map(fuel_mapping).fillna(0)
+        else:
+            processed_data['fuel_type_encoded'] = 0  # Default
+        
+        if 'transmission_type' in processed_data.columns:
+            transmission_mapping = {'Manual': 0, 'Automatic': 1}
+            processed_data['transmission_type_encoded'] = processed_data['transmission_type'].map(transmission_mapping).fillna(0)
+        else:
+            processed_data['transmission_type_encoded'] = 0  # Default
+        
+        # NEW: Encode categorical features created by feature engineering functions
+        
+        # Age category encoding (from create_age_features)
+        if 'age_category' in processed_data.columns:
+            age_mapping = {'New': 0, 'Moderate': 1, 'Old': 2, 'Very_Old': 3}
+            processed_data['age_category_encoded'] = processed_data['age_category'].map(age_mapping).fillna(2)
+        else:
+            processed_data['age_category_encoded'] = 2  # Default to 'Old'
+        
+        # Mileage category encoding (from create_mileage_features)
+        if 'mileage_category' in processed_data.columns:
+            mileage_mapping = {'Low': 0, 'Medium': 1, 'High': 2, 'Very_High': 3}
+            processed_data['mileage_category_encoded'] = processed_data['mileage_category'].map(mileage_mapping).fillna(1)
+        else:
+            processed_data['mileage_category_encoded'] = 1  # Default to 'Medium'
+        
+        # Engine category encoding (from create_engine_features)
+        if 'engine_category' in processed_data.columns:
+            engine_mapping = {'Small': 0, 'Medium': 1, 'Large': 2, 'Very_Large': 3}
+            processed_data['engine_category_encoded'] = processed_data['engine_category'].map(engine_mapping).fillna(1)
+        else:
+            processed_data['engine_category_encoded'] = 1  # Default to 'Medium'
+        
+        # Power category encoding (from create_engine_features)
+        if 'power_category' in processed_data.columns:
+            power_mapping = {'Low': 0, 'Medium': 1, 'High': 2, 'Very_High': 3}
+            processed_data['power_category_encoded'] = processed_data['power_category'].map(power_mapping).fillna(1)
+        else:
+            processed_data['power_category_encoded'] = 1  # Default to 'Medium'
+        
+        # Fuel efficiency category encoding (from create_efficiency_features)
+        if 'fuel_efficiency' in processed_data.columns:
+            efficiency_mapping = {'Poor': 0, 'Average': 1, 'Good': 2, 'Excellent': 3}
+            processed_data['fuel_efficiency_encoded'] = processed_data['fuel_efficiency'].map(efficiency_mapping).fillna(1)
+        else:
+            processed_data['fuel_efficiency_encoded'] = 1  # Default to 'Average'
+        
+        # Drop all categorical columns (both original and created)
+        categorical_columns_to_drop = [
+            'brand', 'fuel_type', 'seller_type', 'transmission_type',  # Original
+            'age_category', 'mileage_category', 'engine_category', 
+            'power_category', 'fuel_efficiency'  # Created by feature engineering
+        ]
+        
+        columns_to_drop = []
+        for col in categorical_columns_to_drop:
+            if col in processed_data.columns:
+                columns_to_drop.append(col)
+        
+        if columns_to_drop:
+            processed_data = processed_data.drop(columns=columns_to_drop, axis=1)
+            logger.info(f'Dropped categorical columns: {columns_to_drop}')
+        
+        logger.info("All categorical features encoded successfully")
+        return processed_data
+
     
     def apply(self, df):
         logger.info("Starting feature engineering...")
@@ -150,6 +212,7 @@ class FeatureEngineer:
         df_engineered = self.create_engine_features(df_engineered)
         df_engineered = self.create_efficiency_features(df_engineered)
         df_engineered = self.create_brand_features(df_engineered)
+        df_engineered = self.encode_categorical_features(df_engineered)
         
         self.feature_names = df_engineered.columns.tolist()
         
@@ -183,23 +246,7 @@ class AdvancedFeatureTransformer(BaseEstimator, TransformerMixin):
             self.categorical_cols = X_engineered.select_dtypes(include=['object', 'category']).columns.tolist()
             
             logger.info(f"Found {len(self.numerical_cols)} numerical and {len(self.categorical_cols)} categorical columns")
-            
-            if len(self.numerical_cols) > 0:
-                self.feature_engineer.scale_features(
-                    X_engineered[self.numerical_cols], 
-                    dtype='numerical', 
-                    fit=True  
-                )
-                logger.info("Fitted numerical scaler")
-            
-            if len(self.categorical_cols) > 0:
-                self.feature_engineer.scale_features(
-                    X_engineered[self.categorical_cols], 
-                    dtype='object', 
-                    fit=True 
-                )
-                logger.info(" Fitted categorical encoder")
-            
+        
             self.fitted = True
             print(f"Transformer fitted successfully on {X.shape[0]} samples")
         
@@ -218,29 +265,7 @@ class AdvancedFeatureTransformer(BaseEstimator, TransformerMixin):
         
         # Transform features using fitted transformers
         current_numerical_cols = X_engineered.select_dtypes(include=[np.number]).columns.tolist()
-        current_categorical_cols = X_engineered.select_dtypes(include=['object', 'category']).columns.tolist()
-        
-        if len(current_numerical_cols) > 0:
-            scaled_features = self.feature_engineer.scale_features(
-                X_engineered[current_numerical_cols],
-                dtype='numerical',
-                fit=False
-            )
-            X_engineered[current_numerical_cols] = scaled_features
 
-        if len(self.categorical_cols) > 0:
-            categorical_cols_present = [col for col in self.categorical_cols if col in X_engineered.columns]
-            if categorical_cols_present:
-                logger.info(f"Encoding {len(categorical_cols_present)} categorical columns: {categorical_cols_present}")
-                
-                encoded_features = self.feature_engineer.scale_features(
-                    X_engineered[categorical_cols_present],
-                    dtype='object',
-                    fit=False
-                )
-                
-                X_engineered[categorical_cols_present] = encoded_features
-                logger.info(f"Successfully encoded categorical features")
 
         return X_engineered
     
@@ -270,7 +295,7 @@ if __name__ == "__main__":
 
         #scaling data
         df = adv.fit_transform(df)
-        print(df.head())
+        print(df.columns)
 
         #exporting the data
         df.to_csv('/home/sumit/PriceLens/data/processed/cardekho_encoded.csv')
